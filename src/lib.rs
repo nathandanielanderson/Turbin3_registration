@@ -5,9 +5,13 @@ pub fn add(left: u64, right: u64) -> u64 {
 #[cfg(test)]
 mod tests {
     
-    use solana_sdk::{signature::{Keypair, Signer}, pubkey::Pubkey};
+
+    use solana_client::{rpc_client::RpcClient};
+    use solana_sdk::{signature::{Keypair, Signer, read_keypair_file}, pubkey::Pubkey};
     use bs58;
-    use std::io::{self, BufRead}; 
+    use std::io::{self, BufRead};
+    use dotenv::dotenv; 
+    use std::env;
 
     #[test]
     fn keygen() {
@@ -54,7 +58,33 @@ mod tests {
     }
 
     #[test] 
-    fn airdop() {} 
+    fn airdrop() {
+        // Load environment variables from '.env'
+        dotenv().ok();
+
+        // Get RPC_URL from .env
+        let rpc_url = env::var("RPC_URL").expect("RPC_URL not set in .env");
+
+        // Import our keypair
+        let keypair = read_keypair_file("dev-wallet.json").expect("Couldn't find wallet file"); 
+
+        // Connected to Solana Devnet RPC Client
+        let client = RpcClient::new(rpc_url);
+
+        // Claim 2 devnet SOL tokens (2 billion lamports)
+        match client.request_airdrop(&keypair.pubkey(), 2_000_000_000u64) {
+
+            Ok(s) => {
+
+                println!("Success! Check out your TX here:");
+                println!("https://explorer.solana.com/tx/{}?cluster=devnet", s.to_string());
+
+            },
+
+            Err(e) => { println!("Oops, something went wrong: {}", e.to_string()); }
+        }
+
+    } 
     
     #[test] 
     fn transfer_sol() {}
