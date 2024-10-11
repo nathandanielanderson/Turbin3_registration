@@ -1208,6 +1208,7 @@ dependencies = [
  "bs58",
  "dotenv",
  "solana-client",
+ "solana-program",
  "solana-sdk",
 ]
 
